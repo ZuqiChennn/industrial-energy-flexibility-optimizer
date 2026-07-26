@@ -88,6 +88,7 @@ src/
   build_artifact.py           dashboard data and provenance builder
 tests/
   test_model.py               conservation, bounds and outcome tests
+  test_outputs.py             generated-output contract tests
 ```
 
 ## Run from scratch
