@@ -4,10 +4,6 @@ A reproducible decision-support project for balancing electricity cost, grid
 carbon intensity and peak demand across a fictional German manufacturing
 network.
 
-> **Independent portfolio project.** Every plant, meter reading, price signal
-> and operating constraint in this repository is deterministic synthetic data.
-> No employer, customer, university-team or hackathon data or code are used.
-
 ![Industrial energy flexibility dashboard](docs/dashboard-preview.png)
 
 ## Decision questions
