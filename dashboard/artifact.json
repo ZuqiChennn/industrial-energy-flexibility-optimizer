@@ -1,0 +1,5830 @@
+{
+  "surface": "dashboard",
+  "manifest": {
+    "version": 1,
+    "surface": "dashboard",
+    "title": "Industrial Energy Flexibility Optimizer",
+    "description": "Decision dashboard for cost, carbon and peak-load trade-offs across a fictional German manufacturing network.",
+    "generatedAt": "2026-07-26T00:00:00Z",
+    "filters": [
+      {
+        "id": "plant",
+        "label": "Plant",
+        "dataset": "kpi",
+        "field": "plant",
+        "defaultValue": "Network",
+        "includeAll": false,
+        "targets": [
+          {
+            "dataset": "comparison",
+            "field": "plant"
+          },
+          {
+            "dataset": "tradeoff",
+            "field": "plant"
+          },
+          {
+            "dataset": "profile",
+            "field": "plant"
+          },
+          {
+            "dataset": "actions",
+            "field": "plant"
+          }
+        ]
+      },
+      {
+        "id": "scenario",
+        "label": "Operating strategy",
+        "dataset": "kpi",
+        "field": "scenario",
+        "defaultValue": "Balanced",
+        "includeAll": false,
+        "targets": [
+          {
+            "dataset": "profile",
+            "field": "selection_scenario"
+          },
+          {
+            "dataset": "actions",
+            "field": "scenario"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "id": "cost_saving",
+        "description": "Annualized energy and peak-demand cost improvement against the unchanged-load baseline.",
+        "dataset": "kpi",
+        "sourceId": "scenario_model",
+        "metrics": [
+          {
+            "label": "Annualized cost saving",
+            "field": "cost_savings_eur",
+            "format": "currency"
+          },
+          {
+            "label": "Relative saving",
+            "field": "cost_savings_pct",
+            "format": "percent",
+            "signed": true
+          }
+        ]
+      },
+      {
+        "id": "peak_reduction",
+        "description": "Reduction in maximum coincident electrical demand for the selected plant or network.",
+        "dataset": "kpi",
+        "sourceId": "scenario_model",
+        "metrics": [
+          {
+            "label": "Peak-load reduction",
+            "field": "peak_reduction_pct",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "carbon_reduction",
+        "description": "Operational electricity emissions avoided through time shifting only.",
+        "dataset": "kpi",
+        "sourceId": "scenario_model",
+        "metrics": [
+          {
+            "label": "Carbon reduction",
+            "field": "carbon_reduction_pct",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "flex_volume",
+        "description": "Energy moved to another interval while daily site energy remains unchanged.",
+        "dataset": "kpi",
+        "sourceId": "scenario_model",
+        "metrics": [
+          {
+            "label": "Flexible energy shifted",
+            "field": "flex_shifted_mwh",
+            "format": "number",
+            "unit": "MWh"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "cost_comparison",
+        "title": "Annualized electricity cost by strategy",
+        "subtitle": "Includes interval energy prices and a transparent monthly peak-demand charge.",
+        "type": "bar",
+        "dataset": "comparison",
+        "sourceId": "scenario_model",
+        "encodings": {
+          "x": {
+            "field": "scenario",
+            "type": "nominal",
+            "label": "Strategy"
+          },
+          "y": {
+            "field": "annual_cost_eur",
+            "type": "quantitative",
+            "label": "Annual cost",
+            "format": "currency"
+          }
+        },
+        "yAxisTitle": "Annual cost",
+        "valueFormat": "currency",
+        "layout": "full"
+      },
+      {
+        "id": "cost_carbon_tradeoff",
+        "title": "Cost and operational-carbon trade-off",
+        "subtitle": "Each point is a strategy for the selected plant or full network.",
+        "type": "scatter",
+        "dataset": "tradeoff",
+        "sourceId": "scenario_model",
+        "encodings": {
+          "x": {
+            "field": "annual_cost_eur",
+            "type": "quantitative",
+            "label": "Annual cost",
+            "format": "currency"
+          },
+          "y": {
+            "field": "carbon_t",
+            "type": "quantitative",
+            "label": "Carbon",
+            "format": "number"
+          },
+          "color": {
+            "field": "scenario",
+            "type": "nominal",
+            "label": "Strategy"
+          }
+        },
+        "xAxisTitle": "Annual cost",
+        "yAxisTitle": "Operational carbon (t)",
+        "layout": "full"
+      },
+      {
+        "id": "load_profile",
+        "title": "Average 24-hour load profile",
+        "subtitle": "Baseline compared with the selected operating strategy.",
+        "type": "line",
+        "dataset": "profile",
+        "sourceId": "scenario_model",
+        "encodings": {
+          "x": {
+            "field": "hour",
+            "type": "ordinal",
+            "label": "Hour of day"
+          },
+          "y": {
+            "field": "average_load_kw",
+            "type": "quantitative",
+            "label": "Average load",
+            "format": "number"
+          },
+          "color": {
+            "field": "series",
+            "type": "nominal",
+            "label": "Series"
+          }
+        },
+        "yAxisTitle": "Average load (kW)",
+        "layout": "full"
+      }
+    ],
+    "tables": [
+      {
+        "id": "largest_actions",
+        "title": "Largest flexibility actions",
+        "subtitle": "Intervals with the greatest modeled increase or reduction for the selected strategy.",
+        "dataset": "actions",
+        "sourceId": "scenario_model",
+        "defaultSort": {
+          "field": "absolute_shift_kw",
+          "direction": "desc"
+        },
+        "density": "dense",
+        "layout": "full",
+        "columns": [
+          {
+            "field": "timestamp",
+            "label": "Interval",
+            "type": "text"
+          },
+          {
+            "field": "plant",
+            "label": "Plant",
+            "type": "text"
+          },
+          {
+            "field": "direction",
+            "label": "Action",
+            "type": "text"
+          },
+          {
+            "field": "shifted_kw",
+            "label": "Load change",
+            "format": "number",
+            "unit": "kW",
+            "movement": true
+          },
+          {
+            "field": "price_eur_mwh",
+            "label": "Energy price",
+            "format": "currency",
+            "unit": "/MWh"
+          },
+          {
+            "field": "carbon_g_kwh",
+            "label": "Grid carbon",
+            "format": "number",
+            "unit": "g/kWh"
+          },
+          {
+            "field": "absolute_shift_kw",
+            "label": "Absolute change",
+            "format": "number",
+            "unit": "kW"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "synthetic_inputs",
+        "label": "Synthetic 15-minute plant telemetry",
+        "path": "data/plant_loads_synthetic.csv",
+        "query": {
+          "engine": "python",
+          "language": "python",
+          "sql": "python src/generate_data.py",
+          "description": "Deterministic generation of fictional plant load, price and carbon-intensity inputs.",
+          "executed_at": "2026-07-26T00:00:00Z",
+          "tables_used": [
+            "data/plant_loads_synthetic.csv"
+          ],
+          "filters": [
+            "21 complete days",
+            "three fictional plants",
+            "15-minute intervals"
+          ],
+          "metric_definitions": {
+            "load_kw": "Average electrical demand during each 15-minute interval.",
+            "flexible_share": "Share of interval load that may move within the same plant-day."
+          }
+        }
+      },
+      {
+        "id": "scenario_model",
+        "label": "Reproducible flexibility scenarios",
+        "path": "data/scenario_summary.csv",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "sql": "SELECT * FROM read_csv_auto('data/scenario_summary.csv') UNION ALL BY NAME SELECT * FROM read_csv_auto('data/plant_summary.csv')",
+          "description": "Reviewed scenario metrics produced by the bounded Python load-shifting model.",
+          "executed_at": "2026-07-26T00:00:00Z",
+          "tables_used": [
+            "data/plant_loads_synthetic.csv",
+            "data/interval_scenarios.csv",
+            "data/scenario_summary.csv",
+            "data/plant_summary.csv"
+          ],
+          "filters": [
+            "daily energy conserved",
+            "45%-165% bounds on the flexible portion",
+            "no production volume or service-level change modeled"
+          ],
+          "metric_definitions": {
+            "annual_cost_eur": "21-day energy cost annualized to 365 days plus twelve monthly demand charges at \u20ac10/kW.",
+            "cost_savings_eur": "Baseline annual cost less scenario annual cost.",
+            "carbon_reduction_pct": "One minus scenario carbon divided by baseline carbon for the same period.",
+            "peak_reduction_pct": "One minus scenario peak demand divided by baseline peak demand.",
+            "flex_shifted_mwh": "Half the absolute interval load movement, avoiding double counting energy moved out and back in."
+          }
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "intro",
+        "type": "markdown",
+        "body": "## Decision view\n\nCompare transparent operating strategies for a fictional manufacturing network. All inputs are deterministic and synthetic; no company or team-project data are used."
+      },
+      {
+        "id": "metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "cost_saving",
+          "peak_reduction",
+          "carbon_reduction",
+          "flex_volume"
+        ]
+      },
+      {
+        "id": "cost",
+        "type": "chart",
+        "chartId": "cost_comparison",
+        "layout": "full"
+      },
+      {
+        "id": "tradeoff",
+        "type": "chart",
+        "chartId": "cost_carbon_tradeoff",
+        "layout": "full"
+      },
+      {
+        "id": "profile",
+        "type": "chart",
+        "chartId": "load_profile",
+        "layout": "full"
+      },
+      {
+        "id": "actions_table",
+        "type": "table",
+        "tableId": "largest_actions",
+        "layout": "full"
+      },
+      {
+        "id": "method",
+        "type": "markdown",
+        "body": "## Method and guardrails\n\nFlexible load moves only within the same plant-day. Daily energy is conserved, the non-flexible portion never moves, and each interval has explicit lower and upper bounds. The scenarios are decision-support examples\u2014not production schedules or forecasts."
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-07-26T00:00:00Z",
+    "status": "ready",
+    "datasets": {
+      "kpi": [
+        {
+          "plant": "Network",
+          "scenario": "Balanced",
+          "cost_savings_eur": 124618.2564,
+          "cost_savings_pct": 0.0158,
+          "carbon_reduction_pct": 0.011,
+          "peak_reduction_pct": 0.0228,
+          "flex_shifted_mwh": 187.8085
+        },
+        {
+          "plant": "Network",
+          "scenario": "Cost First",
+          "cost_savings_eur": 119022.8536,
+          "cost_savings_pct": 0.0151,
+          "carbon_reduction_pct": 0.011,
+          "peak_reduction_pct": 0.018,
+          "flex_shifted_mwh": 189.7517
+        },
+        {
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "cost_savings_eur": 120190.2589,
+          "cost_savings_pct": 0.0152,
+          "carbon_reduction_pct": 0.0138,
+          "peak_reduction_pct": 0.018,
+          "flex_shifted_mwh": 175.0504
+        },
+        {
+          "plant": "Network",
+          "scenario": "Baseline",
+          "cost_savings_eur": 0.0,
+          "cost_savings_pct": 0.0,
+          "carbon_reduction_pct": 0.0,
+          "peak_reduction_pct": 0.0,
+          "flex_shifted_mwh": 0.0
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "cost_savings_eur": 34569.8755,
+          "cost_savings_pct": 0.0136,
+          "carbon_reduction_pct": 0.0098,
+          "peak_reduction_pct": 0.0189,
+          "flex_shifted_mwh": 51.5976
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "cost_savings_eur": 33026.42,
+          "cost_savings_pct": 0.013,
+          "carbon_reduction_pct": 0.0098,
+          "peak_reduction_pct": 0.015,
+          "flex_shifted_mwh": 52.0555
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "cost_savings_eur": 33804.0554,
+          "cost_savings_pct": 0.0133,
+          "carbon_reduction_pct": 0.0124,
+          "peak_reduction_pct": 0.015,
+          "flex_shifted_mwh": 49.0068
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Baseline",
+          "cost_savings_eur": 0.0,
+          "cost_savings_pct": 0.0,
+          "carbon_reduction_pct": 0.0,
+          "peak_reduction_pct": 0.0,
+          "flex_shifted_mwh": 0.0
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "cost_savings_eur": 55443.3131,
+          "cost_savings_pct": 0.0175,
+          "carbon_reduction_pct": 0.0117,
+          "peak_reduction_pct": 0.0262,
+          "flex_shifted_mwh": 84.2648
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "cost_savings_eur": 52792.5471,
+          "cost_savings_pct": 0.0167,
+          "carbon_reduction_pct": 0.0117,
+          "peak_reduction_pct": 0.0206,
+          "flex_shifted_mwh": 85.2142
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "cost_savings_eur": 52805.7642,
+          "cost_savings_pct": 0.0167,
+          "carbon_reduction_pct": 0.0146,
+          "peak_reduction_pct": 0.0206,
+          "flex_shifted_mwh": 77.264
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Baseline",
+          "cost_savings_eur": 0.0,
+          "cost_savings_pct": 0.0,
+          "carbon_reduction_pct": 0.0,
+          "peak_reduction_pct": 0.0,
+          "flex_shifted_mwh": 0.0
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "cost_savings_eur": 34605.0678,
+          "cost_savings_pct": 0.0158,
+          "carbon_reduction_pct": 0.0113,
+          "peak_reduction_pct": 0.0222,
+          "flex_shifted_mwh": 51.9462
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "cost_savings_eur": 33203.8865,
+          "cost_savings_pct": 0.0152,
+          "carbon_reduction_pct": 0.0112,
+          "peak_reduction_pct": 0.0178,
+          "flex_shifted_mwh": 52.482
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "cost_savings_eur": 33580.4393,
+          "cost_savings_pct": 0.0153,
+          "carbon_reduction_pct": 0.0141,
+          "peak_reduction_pct": 0.0178,
+          "flex_shifted_mwh": 48.7796
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Baseline",
+          "cost_savings_eur": 0.0,
+          "cost_savings_pct": 0.0,
+          "carbon_reduction_pct": 0.0,
+          "peak_reduction_pct": 0.0,
+          "flex_shifted_mwh": 0.0
+        }
+      ],
+      "comparison": [
+        {
+          "plant": "Network",
+          "scenario": "Baseline",
+          "annual_cost_eur": 7907665.0736,
+          "carbon_t": 1885.5796,
+          "peak_kw": 15734.697,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "Network",
+          "scenario": "Cost First",
+          "annual_cost_eur": 7788642.22,
+          "carbon_t": 1864.933,
+          "peak_kw": 15451.5778,
+          "cost_savings_eur": 119022.8536
+        },
+        {
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 7787474.8147,
+          "carbon_t": 1859.6521,
+          "peak_kw": 15451.5778,
+          "cost_savings_eur": 120190.2589
+        },
+        {
+          "plant": "Network",
+          "scenario": "Balanced",
+          "annual_cost_eur": 7783046.8172,
+          "carbon_t": 1864.8166,
+          "peak_kw": 15376.6006,
+          "cost_savings_eur": 124618.2564
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 3167926.9435,
+          "carbon_t": 753.8268,
+          "peak_kw": 6343.033,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 2549902.136,
+          "carbon_t": 608.4803,
+          "peak_kw": 5062.348,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 2189835.9941,
+          "carbon_t": 523.2725,
+          "peak_kw": 4329.316,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 3115134.3964,
+          "carbon_t": 744.9988,
+          "peak_kw": 6212.5568,
+          "cost_savings_eur": 52792.5471
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 2516875.716,
+          "carbon_t": 602.5423,
+          "peak_kw": 4986.6153,
+          "cost_savings_eur": 33026.42
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 2156632.1077,
+          "carbon_t": 517.3919,
+          "peak_kw": 4252.4057,
+          "cost_savings_eur": 33203.8865
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 3115121.1793,
+          "carbon_t": 742.7948,
+          "peak_kw": 6212.5568,
+          "cost_savings_eur": 52805.7642
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 2516098.0806,
+          "carbon_t": 600.9514,
+          "peak_kw": 4986.6153,
+          "cost_savings_eur": 33804.0554
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 2156255.5548,
+          "carbon_t": 515.9059,
+          "peak_kw": 4252.4057,
+          "cost_savings_eur": 33580.4393
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 3112483.6304,
+          "carbon_t": 744.979,
+          "peak_kw": 6176.9429,
+          "cost_savings_eur": 55443.3131
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 2515332.2605,
+          "carbon_t": 602.4869,
+          "peak_kw": 4966.4795,
+          "cost_savings_eur": 34569.8755
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 2155230.9263,
+          "carbon_t": 517.3507,
+          "peak_kw": 4233.1781,
+          "cost_savings_eur": 34605.0678
+        }
+      ],
+      "tradeoff": [
+        {
+          "plant": "Network",
+          "scenario": "Baseline",
+          "annual_cost_eur": 7907665.0736,
+          "carbon_t": 1885.5796,
+          "peak_kw": 15734.697,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "Network",
+          "scenario": "Cost First",
+          "annual_cost_eur": 7788642.22,
+          "carbon_t": 1864.933,
+          "peak_kw": 15451.5778,
+          "cost_savings_eur": 119022.8536
+        },
+        {
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 7787474.8147,
+          "carbon_t": 1859.6521,
+          "peak_kw": 15451.5778,
+          "cost_savings_eur": 120190.2589
+        },
+        {
+          "plant": "Network",
+          "scenario": "Balanced",
+          "annual_cost_eur": 7783046.8172,
+          "carbon_t": 1864.8166,
+          "peak_kw": 15376.6006,
+          "cost_savings_eur": 124618.2564
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 3167926.9435,
+          "carbon_t": 753.8268,
+          "peak_kw": 6343.033,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 2549902.136,
+          "carbon_t": 608.4803,
+          "peak_kw": 5062.348,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Baseline",
+          "annual_cost_eur": 2189835.9941,
+          "carbon_t": 523.2725,
+          "peak_kw": 4329.316,
+          "cost_savings_eur": 0.0
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 3115134.3964,
+          "carbon_t": 744.9988,
+          "peak_kw": 6212.5568,
+          "cost_savings_eur": 52792.5471
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 2516875.716,
+          "carbon_t": 602.5423,
+          "peak_kw": 4986.6153,
+          "cost_savings_eur": 33026.42
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "annual_cost_eur": 2156632.1077,
+          "carbon_t": 517.3919,
+          "peak_kw": 4252.4057,
+          "cost_savings_eur": 33203.8865
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 3115121.1793,
+          "carbon_t": 742.7948,
+          "peak_kw": 6212.5568,
+          "cost_savings_eur": 52805.7642
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 2516098.0806,
+          "carbon_t": 600.9514,
+          "peak_kw": 4986.6153,
+          "cost_savings_eur": 33804.0554
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "annual_cost_eur": 2156255.5548,
+          "carbon_t": 515.9059,
+          "peak_kw": 4252.4057,
+          "cost_savings_eur": 33580.4393
+        },
+        {
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 3112483.6304,
+          "carbon_t": 744.979,
+          "peak_kw": 6176.9429,
+          "cost_savings_eur": 55443.3131
+        },
+        {
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 2515332.2605,
+          "carbon_t": 602.4869,
+          "peak_kw": 4966.4795,
+          "cost_savings_eur": 34569.8755
+        },
+        {
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "annual_cost_eur": 2155230.9263,
+          "carbon_t": 517.3507,
+          "peak_kw": 4233.1781,
+          "cost_savings_eur": 34605.0678
+        }
+      ],
+      "profile": [
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 9079.1105
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 9143.3474
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 9144.5438
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 9212.9504
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 9270.8749
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 9349.4597
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 12952.0714
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 12991.976
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 13026.7151
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 12982.6649
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 12934.0046
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 12908.3726
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 12841.2443
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 12774.881
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 12043.5931
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 11956.8547
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 11923.4977
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 11902.2562
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 11893.6866
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 11884.3369
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 11813.7238
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 11836.9634
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 8979.8167
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 8999.82
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 0,
+          "average_load_kw": 9618.7204
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 1,
+          "average_load_kw": 9702.0904
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 2,
+          "average_load_kw": 9673.5765
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 3,
+          "average_load_kw": 9598.9174
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 4,
+          "average_load_kw": 9592.6109
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 5,
+          "average_load_kw": 9419.8742
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 6,
+          "average_load_kw": 11870.4354
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 7,
+          "average_load_kw": 12161.12
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 8,
+          "average_load_kw": 12676.0416
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 9,
+          "average_load_kw": 13257.346
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 10,
+          "average_load_kw": 13577.5992
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 11,
+          "average_load_kw": 13732.7034
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 12,
+          "average_load_kw": 13708.7456
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 13,
+          "average_load_kw": 13647.9225
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 14,
+          "average_load_kw": 13131.6225
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 15,
+          "average_load_kw": 12445.344
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 16,
+          "average_load_kw": 11427.8664
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 17,
+          "average_load_kw": 10774.8069
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 18,
+          "average_load_kw": 10691.8925
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 19,
+          "average_load_kw": 10694.521
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 20,
+          "average_load_kw": 10700.6336
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 21,
+          "average_load_kw": 10899.0096
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 22,
+          "average_load_kw": 9319.7989
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 23,
+          "average_load_kw": 9523.5669
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 3619.769
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 3673.6872
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 3670.7126
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 3712.3143
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 3737.7211
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 3775.7466
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 5196.6046
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 5220.6988
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 5263.9161
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 5204.274
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 5186.6582
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 5165.9007
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 5147.7693
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 5090.3644
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 4816.1896
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 4757.0408
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 4739.2004
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 4718.4436
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 4728.1479
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 4740.7285
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 4693.8359
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 4704.808
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 3579.7275
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 3587.8515
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 0,
+          "average_load_kw": 3882.6196
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 1,
+          "average_load_kw": 3938.5304
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 2,
+          "average_load_kw": 3919.6892
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 3,
+          "average_load_kw": 3889.5306
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 4,
+          "average_load_kw": 3885.8743
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 5,
+          "average_load_kw": 3805.9202
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 6,
+          "average_load_kw": 4704.2643
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 7,
+          "average_load_kw": 4843.187
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 8,
+          "average_load_kw": 5094.9678
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 9,
+          "average_load_kw": 5327.1958
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 10,
+          "average_load_kw": 5449.3766
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 11,
+          "average_load_kw": 5501.6634
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 12,
+          "average_load_kw": 5491.5618
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 13,
+          "average_load_kw": 5470.5857
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 14,
+          "average_load_kw": 5297.9304
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 15,
+          "average_load_kw": 5003.0206
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 16,
+          "average_load_kw": 4536.5111
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 17,
+          "average_load_kw": 4215.3608
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 18,
+          "average_load_kw": 4186.871
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 19,
+          "average_load_kw": 4203.1234
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 20,
+          "average_load_kw": 4196.4472
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 21,
+          "average_load_kw": 4290.6406
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 22,
+          "average_load_kw": 3751.9873
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 23,
+          "average_load_kw": 3845.2515
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2932.2985
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2947.8167
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2949.8392
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2944.4443
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2970.5683
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2962.8256
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 4163.0534
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 4173.7593
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 4187.5059
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 4191.6889
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 4163.9342
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 4165.5201
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 4149.3452
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 4128.7653
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3881.2214
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3865.9161
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3855.1924
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3863.0285
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3860.626
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3828.4682
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3835.768
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3851.492
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2916.1421
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2914.9527
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 0,
+          "average_load_kw": 3063.2439
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 1,
+          "average_load_kw": 3086.0696
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 2,
+          "average_load_kw": 3084.2262
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 3,
+          "average_load_kw": 3049.5402
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 4,
+          "average_load_kw": 3057.5958
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 5,
+          "average_load_kw": 2993.6051
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 6,
+          "average_load_kw": 3871.3861
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 7,
+          "average_load_kw": 3948.4526
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 8,
+          "average_load_kw": 4093.683
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 9,
+          "average_load_kw": 4266.6479
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 10,
+          "average_load_kw": 4360.5395
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 11,
+          "average_load_kw": 4417.3207
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 12,
+          "average_load_kw": 4405.955
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 13,
+          "average_load_kw": 4380.9884
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 14,
+          "average_load_kw": 4182.2753
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 15,
+          "average_load_kw": 3987.098
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 16,
+          "average_load_kw": 3711.7
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 17,
+          "average_load_kw": 3555.0505
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 18,
+          "average_load_kw": 3532.3442
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 19,
+          "average_load_kw": 3507.2624
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 20,
+          "average_load_kw": 3528.3367
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 21,
+          "average_load_kw": 3586.3966
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 22,
+          "average_load_kw": 2991.6539
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 23,
+          "average_load_kw": 3042.8006
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2527.0429
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2521.8436
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2523.992
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2556.1918
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2562.5855
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2610.8875
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 3592.4134
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 3597.5179
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 3575.2931
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 3586.702
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 3583.4121
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 3576.9518
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 3544.1298
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 3555.7513
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3346.182
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3333.8978
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3329.1049
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3320.784
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3304.9127
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3315.1401
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3284.1199
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3280.6634
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2483.9472
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2497.0157
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 0,
+          "average_load_kw": 2672.857
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 1,
+          "average_load_kw": 2677.4903
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 2,
+          "average_load_kw": 2669.6611
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 3,
+          "average_load_kw": 2659.8465
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 4,
+          "average_load_kw": 2649.1409
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 5,
+          "average_load_kw": 2620.349
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 6,
+          "average_load_kw": 3294.785
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 7,
+          "average_load_kw": 3369.4803
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 8,
+          "average_load_kw": 3487.3907
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 9,
+          "average_load_kw": 3663.5022
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 10,
+          "average_load_kw": 3767.6831
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 11,
+          "average_load_kw": 3813.7192
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 12,
+          "average_load_kw": 3811.2287
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 13,
+          "average_load_kw": 3796.3484
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 14,
+          "average_load_kw": 3651.4169
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 15,
+          "average_load_kw": 3455.2254
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 16,
+          "average_load_kw": 3179.6554
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 17,
+          "average_load_kw": 3004.3956
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 18,
+          "average_load_kw": 2972.6772
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 19,
+          "average_load_kw": 2984.1352
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 20,
+          "average_load_kw": 2975.8497
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 21,
+          "average_load_kw": 3021.9724
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 22,
+          "average_load_kw": 2576.1576
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Cost First",
+          "series": "Cost First",
+          "hour": 23,
+          "average_load_kw": 2635.5148
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 9079.1105
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 9143.3474
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 9144.5438
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 9212.9504
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 9270.8749
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 9349.4597
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 12952.0714
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 12991.976
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 13026.7151
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 12982.6649
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 12934.0046
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 12908.3726
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 12841.2443
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 12774.881
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 12043.5931
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 11956.8547
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 11923.4977
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 11902.2562
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 11893.6866
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 11884.3369
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 11813.7238
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 11836.9634
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 8979.8167
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 8999.82
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 0,
+          "average_load_kw": 9264.7365
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 1,
+          "average_load_kw": 9306.2453
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 2,
+          "average_load_kw": 9325.945
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 3,
+          "average_load_kw": 9346.4257
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 4,
+          "average_load_kw": 9367.0272
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 5,
+          "average_load_kw": 9423.118
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 6,
+          "average_load_kw": 11964.8887
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 7,
+          "average_load_kw": 12596.6809
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 8,
+          "average_load_kw": 13325.884
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 9,
+          "average_load_kw": 13720.3679
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 10,
+          "average_load_kw": 13758.6691
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 11,
+          "average_load_kw": 13755.8604
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 12,
+          "average_load_kw": 13719.1582
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 13,
+          "average_load_kw": 13674.368
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 14,
+          "average_load_kw": 13220.7048
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 15,
+          "average_load_kw": 12586.8217
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 16,
+          "average_load_kw": 11450.5136
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 17,
+          "average_load_kw": 10815.405
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 18,
+          "average_load_kw": 10734.0706
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 19,
+          "average_load_kw": 10726.9842
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 20,
+          "average_load_kw": 10702.9475
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 21,
+          "average_load_kw": 10815.9902
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 22,
+          "average_load_kw": 9050.6787
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 23,
+          "average_load_kw": 9193.2743
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 3619.769
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 3673.6872
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 3670.7126
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 3712.3143
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 3737.7211
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 3775.7466
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 5196.6046
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 5220.6988
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 5263.9161
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 5204.274
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 5186.6582
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 5165.9007
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 5147.7693
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 5090.3644
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 4816.1896
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 4757.0408
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 4739.2004
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 4718.4436
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 4728.1479
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 4740.7285
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 4693.8359
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 4704.808
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 3579.7275
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 3587.8515
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 0,
+          "average_load_kw": 3725.5516
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 1,
+          "average_load_kw": 3757.8289
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 2,
+          "average_load_kw": 3765.3773
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 3,
+          "average_load_kw": 3778.7718
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 4,
+          "average_load_kw": 3786.5608
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 5,
+          "average_load_kw": 3812.9835
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 6,
+          "average_load_kw": 4753.3537
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 7,
+          "average_load_kw": 5051.4298
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 8,
+          "average_load_kw": 5379.3451
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 9,
+          "average_load_kw": 5507.1174
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 10,
+          "average_load_kw": 5512.9179
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 11,
+          "average_load_kw": 5510.947
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 12,
+          "average_load_kw": 5495.3099
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 13,
+          "average_load_kw": 5481.8478
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 14,
+          "average_load_kw": 5327.1938
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 15,
+          "average_load_kw": 5075.018
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 16,
+          "average_load_kw": 4553.0384
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 17,
+          "average_load_kw": 4238.3693
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 18,
+          "average_load_kw": 4209.8495
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 19,
+          "average_load_kw": 4221.2099
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 20,
+          "average_load_kw": 4200.773
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 21,
+          "average_load_kw": 4254.3743
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 22,
+          "average_load_kw": 3634.0431
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 23,
+          "average_load_kw": 3698.8991
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2932.2985
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2947.8167
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2949.8392
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2944.4443
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2970.5683
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2962.8256
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 4163.0534
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 4173.7593
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 4187.5059
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 4191.6889
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 4163.9342
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 4165.5201
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 4149.3452
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 4128.7653
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3881.2214
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3865.9161
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3855.1924
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3863.0285
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3860.626
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3828.4682
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3835.768
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3851.492
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2916.1421
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2914.9527
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 0,
+          "average_load_kw": 2968.0462
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 1,
+          "average_load_kw": 2979.1396
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 2,
+          "average_load_kw": 2986.117
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 3,
+          "average_load_kw": 2977.4162
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 4,
+          "average_load_kw": 2991.2155
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 5,
+          "average_load_kw": 2988.8865
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 6,
+          "average_load_kw": 3895.5873
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 7,
+          "average_load_kw": 4059.4676
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 8,
+          "average_load_kw": 4270.2879
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 9,
+          "average_load_kw": 4413.8223
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 10,
+          "average_load_kw": 4430.182
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 11,
+          "average_load_kw": 4424.8924
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 12,
+          "average_load_kw": 4410.1181
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 13,
+          "average_load_kw": 4391.0691
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 14,
+          "average_load_kw": 4214.2929
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 15,
+          "average_load_kw": 4018.5871
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 16,
+          "average_load_kw": 3712.5106
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 17,
+          "average_load_kw": 3561.2306
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 18,
+          "average_load_kw": 3540.7316
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 19,
+          "average_load_kw": 3512.9537
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 20,
+          "average_load_kw": 3527.6308
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 21,
+          "average_load_kw": 3563.5061
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 22,
+          "average_load_kw": 2916.0825
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 23,
+          "average_load_kw": 2950.3988
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2527.0429
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2521.8436
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2523.992
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2556.1918
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2562.5855
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2610.8875
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 3592.4134
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 3597.5179
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 3575.2931
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 3586.702
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 3583.4121
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 3576.9518
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 3544.1298
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 3555.7513
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3346.182
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3333.8978
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3329.1049
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3320.784
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3304.9127
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3315.1401
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3284.1199
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3280.6634
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2483.9472
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2497.0157
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 0,
+          "average_load_kw": 2571.1387
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 1,
+          "average_load_kw": 2569.2769
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 2,
+          "average_load_kw": 2574.4507
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 3,
+          "average_load_kw": 2590.2377
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 4,
+          "average_load_kw": 2589.2509
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 5,
+          "average_load_kw": 2621.248
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 6,
+          "average_load_kw": 3315.9477
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 7,
+          "average_load_kw": 3485.7835
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 8,
+          "average_load_kw": 3676.251
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 9,
+          "average_load_kw": 3799.4283
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 10,
+          "average_load_kw": 3815.5693
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 11,
+          "average_load_kw": 3820.0209
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 12,
+          "average_load_kw": 3813.7302
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 13,
+          "average_load_kw": 3801.4511
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 14,
+          "average_load_kw": 3679.2182
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 15,
+          "average_load_kw": 3493.2166
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 16,
+          "average_load_kw": 3184.9645
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 17,
+          "average_load_kw": 3015.8052
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 18,
+          "average_load_kw": 2983.4895
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 19,
+          "average_load_kw": 2992.8206
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 20,
+          "average_load_kw": 2974.5437
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 21,
+          "average_load_kw": 2998.1099
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 22,
+          "average_load_kw": 2500.5531
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Carbon First",
+          "series": "Carbon First",
+          "hour": 23,
+          "average_load_kw": 2543.9764
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 0,
+          "average_load_kw": 9601.3754
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 1,
+          "average_load_kw": 9667.9528
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 2,
+          "average_load_kw": 9656.8189
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 3,
+          "average_load_kw": 9617.5837
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 4,
+          "average_load_kw": 9618.7541
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 5,
+          "average_load_kw": 9531.5364
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 6,
+          "average_load_kw": 11846.0265
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 7,
+          "average_load_kw": 12217.2151
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 8,
+          "average_load_kw": 12766.638
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 9,
+          "average_load_kw": 13329.5687
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 10,
+          "average_load_kw": 13582.6954
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 11,
+          "average_load_kw": 13685.1981
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 12,
+          "average_load_kw": 13662.9694
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 13,
+          "average_load_kw": 13609.4309
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 14,
+          "average_load_kw": 13092.7606
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 15,
+          "average_load_kw": 12393.9054
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 16,
+          "average_load_kw": 11403.5967
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 17,
+          "average_load_kw": 10774.7912
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 18,
+          "average_load_kw": 10688.2538
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 19,
+          "average_load_kw": 10687.5835
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 20,
+          "average_load_kw": 10687.424
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 21,
+          "average_load_kw": 10852.9081
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 22,
+          "average_load_kw": 9347.3199
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 23,
+          "average_load_kw": 9524.4588
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 9079.1105
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 9143.3474
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 9144.5438
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 9212.9504
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 9270.8749
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 9349.4597
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 12952.0714
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 12991.976
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 13026.7151
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 12982.6649
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 12934.0046
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 12908.3726
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 12841.2443
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 12774.881
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 12043.5931
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 11956.8547
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 11923.4977
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 11902.2562
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 11893.6866
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 11884.3369
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 11813.7238
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 11836.9634
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 8979.8167
+        },
+        {
+          "plant": "Network",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 8999.82
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 0,
+          "average_load_kw": 3876.0421
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 1,
+          "average_load_kw": 3920.1205
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 2,
+          "average_load_kw": 3911.3015
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 3,
+          "average_load_kw": 3897.5233
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 4,
+          "average_load_kw": 3897.3547
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 5,
+          "average_load_kw": 3856.299
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 6,
+          "average_load_kw": 4692.9672
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 7,
+          "average_load_kw": 4869.1929
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 8,
+          "average_load_kw": 5134.0632
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 9,
+          "average_load_kw": 5361.1848
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 10,
+          "average_load_kw": 5444.8533
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 11,
+          "average_load_kw": 5477.3879
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 12,
+          "average_load_kw": 5467.6383
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 13,
+          "average_load_kw": 5452.3281
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 14,
+          "average_load_kw": 5282.4605
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 15,
+          "average_load_kw": 4984.1801
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 16,
+          "average_load_kw": 4528.3096
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 17,
+          "average_load_kw": 4216.3461
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 18,
+          "average_load_kw": 4185.5561
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 19,
+          "average_load_kw": 4200.5472
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 20,
+          "average_load_kw": 4191.2684
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 21,
+          "average_load_kw": 4269.0433
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 22,
+          "average_load_kw": 3767.2443
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 23,
+          "average_load_kw": 3848.8984
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 3619.769
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 3673.6872
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 3670.7126
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 3712.3143
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 3737.7211
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 3775.7466
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 5196.6046
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 5220.6988
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 5263.9161
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 5204.274
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 5186.6582
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 5165.9007
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 5147.7693
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 5090.3644
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 4816.1896
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 4757.0408
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 4739.2004
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 4718.4436
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 4728.1479
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 4740.7285
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 4693.8359
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 4704.808
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 3579.7275
+        },
+        {
+          "plant": "Central Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 3587.8515
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 0,
+          "average_load_kw": 3058.188
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 1,
+          "average_load_kw": 3077.0562
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 2,
+          "average_load_kw": 3079.0626
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 3,
+          "average_load_kw": 3054.5862
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 4,
+          "average_load_kw": 3064.5753
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 5,
+          "average_load_kw": 3025.4478
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 6,
+          "average_load_kw": 3866.5252
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 7,
+          "average_load_kw": 3964.3863
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 8,
+          "average_load_kw": 4118.6334
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 9,
+          "average_load_kw": 4284.6223
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 10,
+          "average_load_kw": 4367.616
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 11,
+          "average_load_kw": 4405.5799
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 12,
+          "average_load_kw": 4396.1066
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 13,
+          "average_load_kw": 4370.6351
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 14,
+          "average_load_kw": 4170.742
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 15,
+          "average_load_kw": 3971.4425
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 16,
+          "average_load_kw": 3703.8113
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 17,
+          "average_load_kw": 3553.73
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 18,
+          "average_load_kw": 3530.7846
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 19,
+          "average_load_kw": 3505.0826
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 20,
+          "average_load_kw": 3524.8808
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 21,
+          "average_load_kw": 3573.5852
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 22,
+          "average_load_kw": 2997.0841
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 23,
+          "average_load_kw": 3040.0084
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2932.2985
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2947.8167
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2949.8392
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2944.4443
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2970.5683
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2962.8256
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 4163.0534
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 4173.7593
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 4187.5059
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 4191.6889
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 4163.9342
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 4165.5201
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 4149.3452
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 4128.7653
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3881.2214
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3865.9161
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3855.1924
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3863.0285
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3860.626
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3828.4682
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3835.768
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3851.492
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2916.1421
+        },
+        {
+          "plant": "North Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2914.9527
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 0,
+          "average_load_kw": 2667.1453
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 1,
+          "average_load_kw": 2670.7761
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 2,
+          "average_load_kw": 2666.4548
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 3,
+          "average_load_kw": 2665.4743
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 4,
+          "average_load_kw": 2656.8242
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 5,
+          "average_load_kw": 2649.7895
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 6,
+          "average_load_kw": 3286.5341
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 7,
+          "average_load_kw": 3383.6359
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 8,
+          "average_load_kw": 3513.9415
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 9,
+          "average_load_kw": 3683.7617
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 10,
+          "average_load_kw": 3770.2261
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 11,
+          "average_load_kw": 3802.2303
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 12,
+          "average_load_kw": 3799.2245
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 13,
+          "average_load_kw": 3786.4677
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 14,
+          "average_load_kw": 3639.5581
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 15,
+          "average_load_kw": 3438.2829
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 16,
+          "average_load_kw": 3171.4757
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 17,
+          "average_load_kw": 3004.7151
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 18,
+          "average_load_kw": 2971.9131
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 19,
+          "average_load_kw": 2981.9537
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 20,
+          "average_load_kw": 2971.2748
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 21,
+          "average_load_kw": 3010.2796
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 22,
+          "average_load_kw": 2582.9914
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Balanced",
+          "hour": 23,
+          "average_load_kw": 2635.5521
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 0,
+          "average_load_kw": 2527.0429
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 1,
+          "average_load_kw": 2521.8436
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 2,
+          "average_load_kw": 2523.992
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 3,
+          "average_load_kw": 2556.1918
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 4,
+          "average_load_kw": 2562.5855
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 5,
+          "average_load_kw": 2610.8875
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 6,
+          "average_load_kw": 3592.4134
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 7,
+          "average_load_kw": 3597.5179
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 8,
+          "average_load_kw": 3575.2931
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 9,
+          "average_load_kw": 3586.702
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 10,
+          "average_load_kw": 3583.4121
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 11,
+          "average_load_kw": 3576.9518
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 12,
+          "average_load_kw": 3544.1298
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 13,
+          "average_load_kw": 3555.7513
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 14,
+          "average_load_kw": 3346.182
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 15,
+          "average_load_kw": 3333.8978
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 16,
+          "average_load_kw": 3329.1049
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 17,
+          "average_load_kw": 3320.784
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 18,
+          "average_load_kw": 3304.9127
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 19,
+          "average_load_kw": 3315.1401
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 20,
+          "average_load_kw": 3284.1199
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 21,
+          "average_load_kw": 3280.6634
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 22,
+          "average_load_kw": 2483.9472
+        },
+        {
+          "plant": "South Plant",
+          "selection_scenario": "Balanced",
+          "series": "Baseline",
+          "hour": 23,
+          "average_load_kw": 2497.0157
+        }
+      ],
+      "actions": [
+        {
+          "timestamp": "07 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1645.4966,
+          "absolute_shift_kw": 1645.4966,
+          "price_eur_mwh": 31.077,
+          "carbon_g_kwh": 188.425
+        },
+        {
+          "timestamp": "07 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1645.4966,
+          "absolute_shift_kw": 1645.4966,
+          "price_eur_mwh": 31.077,
+          "carbon_g_kwh": 188.425
+        },
+        {
+          "timestamp": "07 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1641.3882,
+          "absolute_shift_kw": 1641.3882,
+          "price_eur_mwh": 30.089,
+          "carbon_g_kwh": 187.922
+        },
+        {
+          "timestamp": "07 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1641.3882,
+          "absolute_shift_kw": 1641.3882,
+          "price_eur_mwh": 30.089,
+          "carbon_g_kwh": 187.922
+        },
+        {
+          "timestamp": "07 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1625.3343,
+          "absolute_shift_kw": 1625.3343,
+          "price_eur_mwh": 31.077,
+          "carbon_g_kwh": 188.425
+        },
+        {
+          "timestamp": "12 Jan 13:30",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1624.5821,
+          "absolute_shift_kw": 1624.5821,
+          "price_eur_mwh": 39.434,
+          "carbon_g_kwh": 208.575
+        },
+        {
+          "timestamp": "12 Jan 13:30",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1624.5821,
+          "absolute_shift_kw": 1624.5821,
+          "price_eur_mwh": 39.434,
+          "carbon_g_kwh": 208.575
+        },
+        {
+          "timestamp": "12 Jan 13:30",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1624.5821,
+          "absolute_shift_kw": 1624.5821,
+          "price_eur_mwh": 39.434,
+          "carbon_g_kwh": 208.575
+        },
+        {
+          "timestamp": "13 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1623.2395,
+          "absolute_shift_kw": 1623.2395,
+          "price_eur_mwh": 34.917,
+          "carbon_g_kwh": 209.673
+        },
+        {
+          "timestamp": "07 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1622.7764,
+          "absolute_shift_kw": 1622.7764,
+          "price_eur_mwh": 30.089,
+          "carbon_g_kwh": 187.922
+        },
+        {
+          "timestamp": "13 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1622.4915,
+          "absolute_shift_kw": 1622.4915,
+          "price_eur_mwh": 34.917,
+          "carbon_g_kwh": 209.673
+        },
+        {
+          "timestamp": "05 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1619.4307,
+          "absolute_shift_kw": 1619.4307,
+          "price_eur_mwh": 37.785,
+          "carbon_g_kwh": 231.755
+        },
+        {
+          "timestamp": "22 Jan 14:45",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1618.4411,
+          "absolute_shift_kw": 1618.4411,
+          "price_eur_mwh": 36.801,
+          "carbon_g_kwh": 247.203
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1617.8239,
+          "absolute_shift_kw": 1617.8239,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1617.8239,
+          "absolute_shift_kw": 1617.8239,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "12 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1617.6744,
+          "absolute_shift_kw": 1617.6744,
+          "price_eur_mwh": 43.485,
+          "carbon_g_kwh": 221.926
+        },
+        {
+          "timestamp": "16 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1612.7277,
+          "absolute_shift_kw": 1612.7277,
+          "price_eur_mwh": 42.291,
+          "carbon_g_kwh": 243.542
+        },
+        {
+          "timestamp": "16 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1612.7277,
+          "absolute_shift_kw": 1612.7277,
+          "price_eur_mwh": 42.291,
+          "carbon_g_kwh": 243.542
+        },
+        {
+          "timestamp": "05 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1609.7206,
+          "absolute_shift_kw": 1609.7206,
+          "price_eur_mwh": 37.785,
+          "carbon_g_kwh": 231.755
+        },
+        {
+          "timestamp": "05 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1592.4723,
+          "absolute_shift_kw": 1592.4723,
+          "price_eur_mwh": 37.785,
+          "carbon_g_kwh": 231.755
+        },
+        {
+          "timestamp": "13 Jan 12:00",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1583.8447,
+          "absolute_shift_kw": 1583.8447,
+          "price_eur_mwh": 34.917,
+          "carbon_g_kwh": 209.673
+        },
+        {
+          "timestamp": "16 Jan 14:30",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1582.3341,
+          "absolute_shift_kw": 1582.3341,
+          "price_eur_mwh": 42.291,
+          "carbon_g_kwh": 243.542
+        },
+        {
+          "timestamp": "06 Jan 14:00",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1578.8763,
+          "absolute_shift_kw": 1578.8763,
+          "price_eur_mwh": 35.738,
+          "carbon_g_kwh": 236.058
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Network",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 1577.5791,
+          "absolute_shift_kw": 1577.5791,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "23 Jan 12:15",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 775.9599,
+          "absolute_shift_kw": 775.9599,
+          "price_eur_mwh": 39.88,
+          "carbon_g_kwh": 227.145
+        },
+        {
+          "timestamp": "23 Jan 12:15",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 775.9599,
+          "absolute_shift_kw": 775.9599,
+          "price_eur_mwh": 39.88,
+          "carbon_g_kwh": 227.145
+        },
+        {
+          "timestamp": "23 Jan 12:45",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 774.2276,
+          "absolute_shift_kw": 774.2276,
+          "price_eur_mwh": 44.834,
+          "carbon_g_kwh": 220.029
+        },
+        {
+          "timestamp": "23 Jan 13:30",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 773.6453,
+          "absolute_shift_kw": 773.6453,
+          "price_eur_mwh": 30.769,
+          "carbon_g_kwh": 244.101
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 766.8911,
+          "absolute_shift_kw": 766.8911,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 766.8911,
+          "absolute_shift_kw": 766.8911,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "23 Jan 13:30",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 766.8081,
+          "absolute_shift_kw": 766.8081,
+          "price_eur_mwh": 30.769,
+          "carbon_g_kwh": 244.101
+        },
+        {
+          "timestamp": "23 Jan 13:15",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 763.5355,
+          "absolute_shift_kw": 763.5355,
+          "price_eur_mwh": 40.162,
+          "carbon_g_kwh": 216.47
+        },
+        {
+          "timestamp": "08 Jan 13:45",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 760.5833,
+          "absolute_shift_kw": 760.5833,
+          "price_eur_mwh": 42.384,
+          "carbon_g_kwh": 253.455
+        },
+        {
+          "timestamp": "08 Jan 09:45",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 760.0311,
+          "absolute_shift_kw": 760.0311,
+          "price_eur_mwh": 49.456,
+          "carbon_g_kwh": 244.052
+        },
+        {
+          "timestamp": "08 Jan 12:30",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 759.8438,
+          "absolute_shift_kw": 759.8438,
+          "price_eur_mwh": 43.008,
+          "carbon_g_kwh": 201.993
+        },
+        {
+          "timestamp": "23 Jan 13:30",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 757.6473,
+          "absolute_shift_kw": 757.6473,
+          "price_eur_mwh": 30.769,
+          "carbon_g_kwh": 244.101
+        },
+        {
+          "timestamp": "13 Jan 13:30",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 756.1274,
+          "absolute_shift_kw": 756.1274,
+          "price_eur_mwh": 33.586,
+          "carbon_g_kwh": 232.425
+        },
+        {
+          "timestamp": "08 Jan 10:45",
+          "plant": "Central Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 755.6493,
+          "absolute_shift_kw": 755.6493,
+          "price_eur_mwh": 46.092,
+          "carbon_g_kwh": 217.022
+        },
+        {
+          "timestamp": "08 Jan 14:15",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 752.5497,
+          "absolute_shift_kw": 752.5497,
+          "price_eur_mwh": 35.067,
+          "carbon_g_kwh": 236.748
+        },
+        {
+          "timestamp": "08 Jan 14:15",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 752.5497,
+          "absolute_shift_kw": 752.5497,
+          "price_eur_mwh": 35.067,
+          "carbon_g_kwh": 236.748
+        },
+        {
+          "timestamp": "13 Jan 12:15",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 752.4062,
+          "absolute_shift_kw": 752.4062,
+          "price_eur_mwh": 37.259,
+          "carbon_g_kwh": 187.252
+        },
+        {
+          "timestamp": "08 Jan 11:00",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 751.9479,
+          "absolute_shift_kw": 751.9479,
+          "price_eur_mwh": 39.498,
+          "carbon_g_kwh": 239.795
+        },
+        {
+          "timestamp": "08 Jan 11:00",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 751.9479,
+          "absolute_shift_kw": 751.9479,
+          "price_eur_mwh": 39.498,
+          "carbon_g_kwh": 239.795
+        },
+        {
+          "timestamp": "13 Jan 13:45",
+          "plant": "Central Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 750.3876,
+          "absolute_shift_kw": 750.3876,
+          "price_eur_mwh": 30.84,
+          "carbon_g_kwh": 225.553
+        },
+        {
+          "timestamp": "08 Jan 12:00",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 750.0835,
+          "absolute_shift_kw": 750.0835,
+          "price_eur_mwh": 36.257,
+          "carbon_g_kwh": 214.495
+        },
+        {
+          "timestamp": "22 Jan 14:00",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 748.1135,
+          "absolute_shift_kw": 748.1135,
+          "price_eur_mwh": 37.222,
+          "carbon_g_kwh": 218.645
+        },
+        {
+          "timestamp": "13 Jan 12:15",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 747.4885,
+          "absolute_shift_kw": 747.4885,
+          "price_eur_mwh": 37.259,
+          "carbon_g_kwh": 187.252
+        },
+        {
+          "timestamp": "08 Jan 10:15",
+          "plant": "Central Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 746.3743,
+          "absolute_shift_kw": 746.3743,
+          "price_eur_mwh": 44.36,
+          "carbon_g_kwh": 222.869
+        },
+        {
+          "timestamp": "07 Jan 11:15",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 469.0207,
+          "absolute_shift_kw": 469.0207,
+          "price_eur_mwh": 35.963,
+          "carbon_g_kwh": 158.279
+        },
+        {
+          "timestamp": "20 Jan 14:15",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 466.1775,
+          "absolute_shift_kw": 466.1775,
+          "price_eur_mwh": 34.725,
+          "carbon_g_kwh": 233.673
+        },
+        {
+          "timestamp": "20 Jan 14:15",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 466.1775,
+          "absolute_shift_kw": 466.1775,
+          "price_eur_mwh": 34.725,
+          "carbon_g_kwh": 233.673
+        },
+        {
+          "timestamp": "07 Jan 11:45",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 465.353,
+          "absolute_shift_kw": 465.353,
+          "price_eur_mwh": 32.956,
+          "carbon_g_kwh": 170.251
+        },
+        {
+          "timestamp": "07 Jan 11:45",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 465.353,
+          "absolute_shift_kw": 465.353,
+          "price_eur_mwh": 32.956,
+          "carbon_g_kwh": 170.251
+        },
+        {
+          "timestamp": "20 Jan 09:45",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 465.3497,
+          "absolute_shift_kw": 465.3497,
+          "price_eur_mwh": 52.469,
+          "carbon_g_kwh": 217.268
+        },
+        {
+          "timestamp": "07 Jan 11:45",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 464.16,
+          "absolute_shift_kw": 464.16,
+          "price_eur_mwh": 32.956,
+          "carbon_g_kwh": 170.251
+        },
+        {
+          "timestamp": "20 Jan 14:45",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 463.9334,
+          "absolute_shift_kw": 463.9334,
+          "price_eur_mwh": 38.346,
+          "carbon_g_kwh": 236.256
+        },
+        {
+          "timestamp": "20 Jan 14:45",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 463.9334,
+          "absolute_shift_kw": 463.9334,
+          "price_eur_mwh": 38.346,
+          "carbon_g_kwh": 236.256
+        },
+        {
+          "timestamp": "20 Jan 14:45",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 463.9334,
+          "absolute_shift_kw": 463.9334,
+          "price_eur_mwh": 38.346,
+          "carbon_g_kwh": 236.256
+        },
+        {
+          "timestamp": "07 Jan 11:15",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 463.4425,
+          "absolute_shift_kw": 463.4425,
+          "price_eur_mwh": 35.963,
+          "carbon_g_kwh": 158.279
+        },
+        {
+          "timestamp": "05 Jan 13:15",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 460.4126,
+          "absolute_shift_kw": 460.4126,
+          "price_eur_mwh": 33.613,
+          "carbon_g_kwh": 192.561
+        },
+        {
+          "timestamp": "05 Jan 13:15",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 460.4126,
+          "absolute_shift_kw": 460.4126,
+          "price_eur_mwh": 33.613,
+          "carbon_g_kwh": 192.561
+        },
+        {
+          "timestamp": "05 Jan 13:15",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 460.4126,
+          "absolute_shift_kw": 460.4126,
+          "price_eur_mwh": 33.613,
+          "carbon_g_kwh": 192.561
+        },
+        {
+          "timestamp": "08 Jan 10:45",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 460.2502,
+          "absolute_shift_kw": 460.2502,
+          "price_eur_mwh": 46.092,
+          "carbon_g_kwh": 217.022
+        },
+        {
+          "timestamp": "20 Jan 09:15",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 460.0274,
+          "absolute_shift_kw": 460.0274,
+          "price_eur_mwh": 43.43,
+          "carbon_g_kwh": 235.521
+        },
+        {
+          "timestamp": "06 Jan 12:00",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.7551,
+          "absolute_shift_kw": 459.7551,
+          "price_eur_mwh": 36.034,
+          "carbon_g_kwh": 211.091
+        },
+        {
+          "timestamp": "06 Jan 12:00",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.7551,
+          "absolute_shift_kw": 459.7551,
+          "price_eur_mwh": 36.034,
+          "carbon_g_kwh": 211.091
+        },
+        {
+          "timestamp": "06 Jan 14:00",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.2166,
+          "absolute_shift_kw": 459.2166,
+          "price_eur_mwh": 35.738,
+          "carbon_g_kwh": 236.058
+        },
+        {
+          "timestamp": "06 Jan 14:00",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.2166,
+          "absolute_shift_kw": 459.2166,
+          "price_eur_mwh": 35.738,
+          "carbon_g_kwh": 236.058
+        },
+        {
+          "timestamp": "06 Jan 12:30",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.1723,
+          "absolute_shift_kw": 459.1723,
+          "price_eur_mwh": 36.334,
+          "carbon_g_kwh": 234.6
+        },
+        {
+          "timestamp": "06 Jan 12:30",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.1723,
+          "absolute_shift_kw": 459.1723,
+          "price_eur_mwh": 36.334,
+          "carbon_g_kwh": 234.6
+        },
+        {
+          "timestamp": "13 Jan 11:45",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 459.0871,
+          "absolute_shift_kw": 459.0871,
+          "price_eur_mwh": 38.209,
+          "carbon_g_kwh": 209.436
+        },
+        {
+          "timestamp": "08 Jan 12:30",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 458.7261,
+          "absolute_shift_kw": 458.7261,
+          "price_eur_mwh": 43.008,
+          "carbon_g_kwh": 201.993
+        },
+        {
+          "timestamp": "20 Jan 14:15",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 458.4611,
+          "absolute_shift_kw": 458.4611,
+          "price_eur_mwh": 34.725,
+          "carbon_g_kwh": 233.673
+        },
+        {
+          "timestamp": "05 Jan 10:45",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 458.3301,
+          "absolute_shift_kw": 458.3301,
+          "price_eur_mwh": 39.696,
+          "carbon_g_kwh": 178.784
+        },
+        {
+          "timestamp": "05 Jan 10:45",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 458.3301,
+          "absolute_shift_kw": 458.3301,
+          "price_eur_mwh": 39.696,
+          "carbon_g_kwh": 178.784
+        },
+        {
+          "timestamp": "08 Jan 11:30",
+          "plant": "North Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 457.5213,
+          "absolute_shift_kw": 457.5213,
+          "price_eur_mwh": 40.397,
+          "carbon_g_kwh": 224.663
+        },
+        {
+          "timestamp": "05 Jan 14:30",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 456.6739,
+          "absolute_shift_kw": 456.6739,
+          "price_eur_mwh": 37.785,
+          "carbon_g_kwh": 231.755
+        },
+        {
+          "timestamp": "07 Jan 11:15",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 456.6277,
+          "absolute_shift_kw": 456.6277,
+          "price_eur_mwh": 35.963,
+          "carbon_g_kwh": 158.279
+        },
+        {
+          "timestamp": "07 Jan 12:30",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 456.1645,
+          "absolute_shift_kw": 456.1645,
+          "price_eur_mwh": 27.176,
+          "carbon_g_kwh": 199.967
+        },
+        {
+          "timestamp": "05 Jan 10:15",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.9079,
+          "absolute_shift_kw": 455.9079,
+          "price_eur_mwh": 43.787,
+          "carbon_g_kwh": 179.056
+        },
+        {
+          "timestamp": "07 Jan 12:15",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.901,
+          "absolute_shift_kw": 455.901,
+          "price_eur_mwh": 33.916,
+          "carbon_g_kwh": 188.232
+        },
+        {
+          "timestamp": "16 Jan 13:45",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.5223,
+          "absolute_shift_kw": 455.5223,
+          "price_eur_mwh": 36.523,
+          "carbon_g_kwh": 217.726
+        },
+        {
+          "timestamp": "16 Jan 13:45",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.5223,
+          "absolute_shift_kw": 455.5223,
+          "price_eur_mwh": 36.523,
+          "carbon_g_kwh": 217.726
+        },
+        {
+          "timestamp": "16 Jan 13:45",
+          "plant": "South Plant",
+          "scenario": "Carbon First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.5223,
+          "absolute_shift_kw": 455.5223,
+          "price_eur_mwh": 36.523,
+          "carbon_g_kwh": 217.726
+        },
+        {
+          "timestamp": "12 Jan 10:45",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.2962,
+          "absolute_shift_kw": 455.2962,
+          "price_eur_mwh": 37.543,
+          "carbon_g_kwh": 201.751
+        },
+        {
+          "timestamp": "12 Jan 10:45",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.2962,
+          "absolute_shift_kw": 455.2962,
+          "price_eur_mwh": 37.543,
+          "carbon_g_kwh": 201.751
+        },
+        {
+          "timestamp": "07 Jan 12:30",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 455.0437,
+          "absolute_shift_kw": 455.0437,
+          "price_eur_mwh": 27.176,
+          "carbon_g_kwh": 199.967
+        },
+        {
+          "timestamp": "07 Jan 12:15",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 454.6568,
+          "absolute_shift_kw": 454.6568,
+          "price_eur_mwh": 33.916,
+          "carbon_g_kwh": 188.232
+        },
+        {
+          "timestamp": "16 Jan 14:30",
+          "plant": "North Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 454.5289,
+          "absolute_shift_kw": 454.5289,
+          "price_eur_mwh": 42.291,
+          "carbon_g_kwh": 243.542
+        },
+        {
+          "timestamp": "19 Jan 11:15",
+          "plant": "South Plant",
+          "scenario": "Cost First",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 454.339,
+          "absolute_shift_kw": 454.339,
+          "price_eur_mwh": 37.07,
+          "carbon_g_kwh": 200.719
+        },
+        {
+          "timestamp": "19 Jan 11:15",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 454.339,
+          "absolute_shift_kw": 454.339,
+          "price_eur_mwh": 37.07,
+          "carbon_g_kwh": 200.719
+        },
+        {
+          "timestamp": "06 Jan 12:30",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 453.6789,
+          "absolute_shift_kw": 453.6789,
+          "price_eur_mwh": 36.334,
+          "carbon_g_kwh": 234.6
+        },
+        {
+          "timestamp": "12 Jan 12:00",
+          "plant": "South Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 453.0384,
+          "absolute_shift_kw": 453.0384,
+          "price_eur_mwh": 37.231,
+          "carbon_g_kwh": 194.332
+        },
+        {
+          "timestamp": "08 Jan 12:00",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 450.3684,
+          "absolute_shift_kw": 450.3684,
+          "price_eur_mwh": 36.257,
+          "carbon_g_kwh": 214.495
+        },
+        {
+          "timestamp": "12 Jan 13:30",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 448.3292,
+          "absolute_shift_kw": 448.3292,
+          "price_eur_mwh": 39.434,
+          "carbon_g_kwh": 208.575
+        },
+        {
+          "timestamp": "06 Jan 14:00",
+          "plant": "North Plant",
+          "scenario": "Balanced",
+          "direction": "Increase / pre-load",
+          "shifted_kw": 447.718,
+          "absolute_shift_kw": 447.718,
+          "price_eur_mwh": 35.738,
+          "carbon_g_kwh": 236.058
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "synthetic_inputs",
+      "label": "Synthetic 15-minute plant telemetry",
+      "path": "data/plant_loads_synthetic.csv",
+      "query": {
+        "engine": "python",
+        "language": "python",
+        "sql": "python src/generate_data.py",
+        "description": "Deterministic generation of fictional plant load, price and carbon-intensity inputs.",
+        "executed_at": "2026-07-26T00:00:00Z",
+        "tables_used": [
+          "data/plant_loads_synthetic.csv"
+        ],
+        "filters": [
+          "21 complete days",
+          "three fictional plants",
+          "15-minute intervals"
+        ],
+        "metric_definitions": {
+          "load_kw": "Average electrical demand during each 15-minute interval.",
+          "flexible_share": "Share of interval load that may move within the same plant-day."
+        }
+      }
+    },
+    {
+      "id": "scenario_model",
+      "label": "Reproducible flexibility scenarios",
+      "path": "data/scenario_summary.csv",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "sql": "SELECT * FROM read_csv_auto('data/scenario_summary.csv') UNION ALL BY NAME SELECT * FROM read_csv_auto('data/plant_summary.csv')",
+        "description": "Reviewed scenario metrics produced by the bounded Python load-shifting model.",
+        "executed_at": "2026-07-26T00:00:00Z",
+        "tables_used": [
+          "data/plant_loads_synthetic.csv",
+          "data/interval_scenarios.csv",
+          "data/scenario_summary.csv",
+          "data/plant_summary.csv"
+        ],
+        "filters": [
+          "daily energy conserved",
+          "45%-165% bounds on the flexible portion",
+          "no production volume or service-level change modeled"
+        ],
+        "metric_definitions": {
+          "annual_cost_eur": "21-day energy cost annualized to 365 days plus twelve monthly demand charges at \u20ac10/kW.",
+          "cost_savings_eur": "Baseline annual cost less scenario annual cost.",
+          "carbon_reduction_pct": "One minus scenario carbon divided by baseline carbon for the same period.",
+          "peak_reduction_pct": "One minus scenario peak demand divided by baseline peak demand.",
+          "flex_shifted_mwh": "Half the absolute interval load movement, avoiding double counting energy moved out and back in."
+        }
+      }
+    }
+  ],
+  "package_info": {
+    "root": "industrial-energy-flexibility-optimizer",
+    "manifestPath": "dashboard/artifact.json",
+    "snapshotPath": "dashboard/artifact.json"
+  }
+}
